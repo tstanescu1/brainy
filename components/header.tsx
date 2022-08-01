@@ -29,8 +29,8 @@ const Header = ({ user, loading }: HeaderProps) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/advanced/ssr-profile">
-                    <a>Server rendered profile (advanced)</a>
+                  <Link href="/research">
+                    <a>reSearch</a>
                   </Link>
                 </li>
                 <li>

@@ -1,12 +1,13 @@
 import Layout from '../components/layout'
 import { useFetchUser } from '../lib/user'
-
+// add bootstrap css 
+import 'bootstrap/dist/css/bootstrap.css'
 const Home = () => {
   const { user, loading } = useFetchUser()
 
   return (
     <Layout user={user} loading={loading}>
-      <h1>Next.js and Auth0 Example</h1>
+      <h1>INDEX PAGE</h1>
 
       {loading && <p>Loading login info...</p>}
 
@@ -24,7 +25,7 @@ const Home = () => {
 
       {user && (
         <>
-          <h4>Rendered user info on the client</h4>
+          <h4>Rendered user info on the clientsss</h4>
           <img src={user.picture} alt="user picture" />
           <p>nickname: {user.nickname}</p>
           <p>name: {user.name}</p>

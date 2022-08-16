@@ -1,7 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
   
 export const openAIResponse = async (question) => {
-    //const content = document.querySelector("textarea").value;
 
     const configuration = new Configuration({
       apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY

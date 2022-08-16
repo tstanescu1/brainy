@@ -8,6 +8,7 @@ type HeaderProps = {
 const Header = ({ user, loading }: HeaderProps) => {
   return (
     <header>
+      
       <nav>
         <ul>
           <li>
@@ -25,7 +26,7 @@ const Header = ({ user, loading }: HeaderProps) => {
               <>
                 <li>
                   <Link href="/profile">
-                    <a>Client-rendered profile</a>
+                    <a>Profile</a>
                   </Link>
                 </li>
                 <li>

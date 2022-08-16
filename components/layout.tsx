@@ -11,7 +11,7 @@ const Layout = ({ user, loading = false, children }: LayoutProps) => {
   return (
     <>
       <Head>
-        <title>Next.js with Auth0</title>
+        <title>Brainy the Research AI</title>
       </Head>
 
       <Header user={user} loading={loading} />

@@ -1,0 +1,33 @@
+body *, * {
+    box-sizing: border-box !important;
+  }
+  
+  .chat-item {
+    background-color: #ffe1e1;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 30px;
+    padding: 50px;
+    width: 100%;
+    overflow: hidden
+  }
+  
+  .navbar {
+    position: fixed;
+    width: 100%;
+  }
+  
+  .chat-footer{
+    background-color: #dfeeff;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  .chat-box {
+    height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    padding: 60px 0;
+  }

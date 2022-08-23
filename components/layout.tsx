@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import React from 'react'
 import Header from './header'
 
 type LayoutProps = {
@@ -8,6 +9,8 @@ type LayoutProps = {
 }
 
 const Layout = ({ user, loading = false, children }: LayoutProps) => {
+
+
   return (
     <>
       <Head>
@@ -17,17 +20,19 @@ const Layout = ({ user, loading = false, children }: LayoutProps) => {
       <Header user={user} loading={loading} />
 
       <main>
-        <div className="container">{children}</div>
+        {children}
       </main>
 
       <style jsx>{`
-        .container {
-          max-width: 42rem;
-          margin: 1.5rem auto;
+        main {
+          // position: relative;
+          // height: 100vh;
+          // box-sizing: border-box;
         }
       `}</style>
       <style jsx global>{`
         body {
+          background: #eee; //gray out whitespace
           margin: 0;
           color: #333;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,

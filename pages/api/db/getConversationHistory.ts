@@ -1,13 +1,16 @@
+import ObjectID from "bson-objectid";
 import { connectToDatabase } from "../../../services/mongoDB"
 
 
 export default async function handler(req, res) {
 
     const { db } = await connectToDatabase();
+    const { body } = req
+    const { payload, collection } = body
 
     await db
-        .collection("conversationHistory")
-        .find({})
+        .collection(body.collection)
+        .find({_id: ObjectID(body.id)})
         .sort({ metacritic: -1 })
         .limit(20)
         .toArray()

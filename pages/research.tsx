@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connectToDatabase } from "../services/mongoDB";
 import { openAIResponse } from "../services/openaiService";
 import Image from 'next/image'
 import axios from "axios";
-import useSWR, { mutate, SWRConfig } from 'swr';
-import router from 'next/router'
+import router, { useRouter } from 'next/router'
 
 import { useFetchUser } from '../lib/user'
 
@@ -12,46 +11,117 @@ import Layout from '../components/layout'
 import styles from './research.module.scss'
 import auth0 from "../lib/auth0";
 import { GetServerSideProps } from "next/types";
+import { useQuery } from "react-query";
+import ObjectID from "bson-objectid"
+import { getCookie } from 'cookies-next';
+import { setCookie } from 'cookies-next';
 
 
+//make chat full div - https://jsfiddle.net/m0rmLLca/7/
+//make sure to test cases internet connection is down or response id down
 
+//add reply button, or reply single / reply all previous
+//reply single - use last conversation in array by time?
+//reply all - use all previous conversation in the prompt - or additional promptSet which then gets cleared on response?
+//delete specific conversation to optimize chat
 
-export function Research() {
-    const [promptText, setPromptText] = useState("");
+//session cookie extend time logged in and error handling with alerts? can we use vercel's alerts?
+//on delete css effect to fade away
+//Format text from openAI so it looks properly indented
+
+//Maybe only display last 50 convos max? Or increase size of response systematically
+
+const fetchConversation = async (id) => {
+    if (id && id.length === 24) {
+        const res = await fetch('api/db/getConversationHistory', {
+            method: "POST",
+            body: JSON.stringify({
+                collection: 'conversationHistory',
+                id: id, //"630d5f95472cee4172def093", //62fafb7a14e2d952504b6db4
+            }),
+            headers:
+            {
+                "Content-Type":
+                    "application/json",
+            },
+        })
+        return res.json();
+    }
+}
+
+export default function Research({ conversationHistory }) {
+
     const { user, loading } = useFetchUser()
+    const { query } = useRouter();
+    const queryID = query.id;
+    const getID = getCookie('id');
+    const setID = (queryID: string) => setCookie('id', queryID)
 
-    const [answer, setAnswer] = useState("")
-    const [id, setID] = useState();
+    console.log('getID', getID)
+    const [question, setQuestion] = useState('')
+    const [tempQuestion, setTempQuestion] = useState(null)
+    const [isBusy, setIsBusy] = useState(false);
+    const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getID))
+    const [conversation, setConversation] = useState() //had to remove
+    const messagesEndRef = useRef(null);
 
-    const fetcher = url => axios.get(url).then(res => res.data)
+    useEffect(() => {
+        if (query.new) {
+            setConversation(null);
+        } else if (queryID === getID) { //If ID's match
+            refetch().then(data => setConversation(data?.data.data))
+        }
+        else if (queryID?.length === 24 && queryID !== getID) { //If a New ID exists in the browser, set it
+            console.log('queryID',queryID)
+            setID(queryID)
+        } else if (getID && !queryID) {  //If there is an ID in cookie, but no ID in the browser, default to the cookie
+            router.push({ pathname: '/research', query: { id: getID } })
+        } else {
+            setConversation(null)
+        }
+    }, [data, query, queryID, getID])
 
-    const { data, error, isValidating } = useSWR('api/db/getConversationHistory')
-    const [conversation, setConversation] = useState(data[0]?.conversation)
+    //If new, clear convo, and on Submit it will create a new ID
+    //If ID exists from URL - should LOAD ID in URL
+    //If NO ID in URL - load existing ID from storage
+    //If id exists in localstorage but no ID has been provided, add ID to query params
+
+    const scrollToBottom = () => {
+        data && messagesEndRef.current && messagesEndRef.current.scrollIntoView({
+            //inline: "center",
+            behavior: "smooth",
+            //alignToTop: true
+        });
+    };
+    useEffect(scrollToBottom, [conversation, isBusy, tempQuestion]);
 
 
-    const handleSubmitQuestion = async () => {
-        //const pl = { ...payload, prompt: promptText };
-        //setPayload(pl);
-        await openAIResponse(promptText).then(res => setAnswer(res))
-        //setAnswer(answer);
-        //setPromptText(promptText);
-        console.log(answer)
+    const handleSubmitQuestion = async (e) => {
+        e.preventDefault();
+        setIsBusy(true);
+        setTempQuestion(question);
+        setQuestion("");
+        const res = await openAIResponse(question, conversation);
+        conversation ? handleUpdate(res) : handleCreate(res);
     };
 
-    async function handleCreate() {
+
+
+    async function handleCreate(res) {
+        setIsBusy(true)
         const response = await
             fetch("/api/db/insertOneMongo", {
                 method: "POST",
                 body: JSON.stringify({
                     payload: {
                         userEmail: user.email,
-                        subject: "My first subject",
+                        subject: "Prompt Helper Subject",
                         dateCreated: new Date(),
                         conversation: [
                             {
                                 timestamp: new Date(),
-                                question: promptText,
-                                answer: answer,
+                                question: question,
+                                answer: res,
                             }
                         ]
                     },
@@ -65,26 +135,91 @@ export function Research() {
             })
 
         await response.json().then((data) => {
-            localStorage.setItem("id", data.id)
-            fetcher('api/db/getConversationHistory')
-                .then((data) => {
-                    setConversation(JSON.parse(JSON.stringify(data.data)));
+            const newID = JSON.parse(JSON.stringify(data.id))
+            console.log('newID CREATE NEW', newID, data)
+            setCookie('id', newID);
+            router.push({ pathname: '/research', query: { id: newID } })
+                .then(() => {
+                    refetch().then(data => {
+                        console.log('data in refetch', data)
+                        setConversation(JSON.parse(JSON.stringify(data.data.data)));
+                        setTempQuestion(null)
+                        setIsBusy(false)
+                    })
                 })
+            //after created clear ?new query param, and set new ID in url bar so it fetches the right data!
         }
         )
     }
 
-    async function handleUpdate() {
+    async function handleUpdate(res) {
+        // setIsBusy(true)
+
         await fetch("/api/db/updateOneMongo", {
             method: "PATCH",
             body: JSON.stringify({
                 payload: {
                     timestamp: new Date(),
-                    question: promptText,
-                    answer: answer,
+                    question: question,
+                    answer: res,
                 },
                 collection: 'conversationHistory',
-                id: localStorage.getItem('id'),
+                id: getID,
+            }),
+            headers:
+            {
+                "Content-Type":
+                    "application/json",
+            },
+        }).then(() => {
+            refetch()
+                .then((data) => {
+                    console.log('updated data', JSON.parse(JSON.stringify(data.data.data)))
+                    setConversation(JSON.parse(JSON.stringify(data.data.data)));
+                    setTempQuestion(null)
+                    setIsBusy(false)
+                }).catch(err => console.log(err))
+        }
+        )
+    }
+
+    const handleDeleteQuestion = async (timestamp) => {
+        await fetch("/api/db/deleteOneMongo", {
+            method: "DELETE",
+            body: JSON.stringify({
+                payload: {
+                    timestamp,
+                },
+
+                collection: 'conversationHistory',
+                id: getID,
+            }),
+            headers:
+            {
+                "Content-Type":
+                    "application/json",
+            },
+        }).then(() => refetch()
+            .then((data) => {
+                console.log('del', JSON.parse(JSON.stringify(data.data)))
+
+                setConversation(JSON.parse(JSON.stringify(data.data.data)));
+                // setIsBusy(false)
+            }).catch(err => console.log(err))
+            // fetcher('api/db/getConversationHistory')
+            // .then((data) => {
+            //     setConversation(JSON.parse(JSON.stringify(data.data)));
+            //     // setIsBusy(false)
+            // }).catch(err => console.log(err))
+        )
+    }
+
+    const handleFetchConversation = async (id) => {
+        await fetch("api/db/getConversationHistory", {
+            method: "GET",
+            body: JSON.stringify({
+                collection: 'conversationHistory',
+                id: id,
             }),
             headers:
             {
@@ -92,125 +227,139 @@ export function Research() {
                     "application/json",
             },
         }).then(() =>
-            fetcher('api/db/getConversationHistory')
+            refetch()
                 .then((data) => {
-                    setConversation(JSON.parse(JSON.stringify(data.data)));
-                })
+                    setConversation(JSON.parse(JSON.stringify(data.data.data)));
+                    // setIsBusy(false)
+                }).catch(err => console.log(err))
         )
     }
-
+    console.log('convo', conversation)
     return (
         //Redirect to login link if no user
         <Layout user={user} loading={loading}>
-            <h1>Research Topics</h1>
 
-            <div>
-                {conversation?.map((conversation, index) => {
+            <div id="chatBox" className={styles.msgerChat}>
+                <div className={styles.msgBubble}>
+                    <div className={styles.msgInfo}>
+                        <div className={styles.msgInfoName}>Brainy</div>
+                        <div className={styles.msgInfoTime}></div>
+                    </div>
+
+                    <div className={styles.msgText}>
+                        Hi, I am Brainy, the research AI! Ask me a question. More details, the better! 😄
+                    </div>
+                </div>
+
+                {conversation && conversation?.map((conversation, index) => {
                     const questionDate = new Date(conversation.timestamp).toLocaleString()
                     return (<div key={index}>
-                        <div className={styles.container + " " + styles.darker}>
-                            <div className={styles.timeRight}>
-                                <Image width={60} height={60} src={user.picture} alt="Avatar" />
+
+                        <div className={styles.msg + ' ' + styles.rightMsg}>
+                            {/* <div
+                            className={styles.msgImg}
+                            style={{ backgroundImage: "url(" + 'https://image.flaticon.com/icons/svg/145/145867.svg' + ")" }}
+                        ></div> */}
+
+                            <div className={styles.msgBubble} id="bubble">
+                                <button type="button" onClick={() => handleDeleteQuestion(conversation.timestamp)} className={styles.close}></button>
+
+
+                                <div className={styles.msgInfo}>
+                                    <div><div className={styles.msgInfoName}>{user?.name}</div>
+
+                                    </div>
+                                    <div className={styles.msgInfoTime}></div>
+                                </div>
+
+                                <div className={styles.msgText}>
+                                    {conversation.question}
+                                </div>
                             </div>
-                            <p>{conversation.question}</p>
-                            <span className={styles.timeLeft}>{questionDate}</span>
                         </div>
 
-                        <div className={styles.container}>
-                            <img src="/brainy.jpg" alt="Avatar" />
-                            <p>{conversation.answer}</p>
+                        <div className={styles.msg + ' ' + styles.leftMsg}>
+
+                            {/* HIDE BELOW ON MOBILE. 
+                        <div
+                            className={styles.msgImg}
+                            style={{ backgroundImage: "url(" + 'https://image.flaticon.com/icons/svg/145/145867.svg' + ")" }}
+
+                        ></div> */}
+
+                            <div className={styles.msgBubble}>
+                                <div className={styles.msgInfo}>
+                                    <div className={styles.msgInfoName}>Brainy</div>
+                                    <div className={styles.msgInfoTime}>{questionDate}</div>
+                                </div>
+
+                                <div className={styles.msgText}>
+                                    {conversation.answer}
+                                </div>
+                            </div>
                         </div>
+
+
                     </div>)
                 })
                 }
+                {tempQuestion && <><div className={styles.msg + ' ' + styles.rightMsg}>
+                    <div className={styles.msgBubble}>
+                        <div className={styles.msgInfo}>
+                            <div className={styles.msgInfoName}>{user?.name}</div>
+                            <div className={styles.msgInfoTime}></div>
+                        </div>
+
+                        <div className={styles.msgText}>
+                            {tempQuestion}
+                        </div>
+                    </div>
+
+                </div>
+                    <div className={styles.msg + ' ' + styles.leftMsg + ' ' + styles.typingWrapper}>
+                        <div className={styles.typingIndicator}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+
+                </>
+                }
+                <div ref={messagesEndRef} />
             </div>
 
-            <textarea style={{ width: '77vw', height: '140px' }}
-                value={promptText}
-                onChange={(e) => setPromptText(e.target.value)}
-            />
-            <button
-                onClick={() => {
-                    handleSubmitQuestion()
-                
-                }}
-            >
-                Ask
-            </button>
-            {conversation ?
-                <button
-                    onClick={() => handleUpdate()}>Update Conversation
-                </button> :
-                <button
-                    onClick={() => handleCreate()}>Create Converation
-                </button>}
-
-
-
-
-            {/* <div className={styles.container}>
-                <h1>Research Topics</h1>
-
-
-                <textarea
-
-                    value={`${promptText + answer}`}
-                    onChange={(e) => changePromptHandler(e)}
-                />
-                <button
-                    onClick={() => handleSubmit()}
-                >
-                    Submit
-                </button>
-                <button
-                    onClick={() => handleSave()}
-                >
-                    Save
-                </button>
-                <h3>Favorites</h3>
-                {favorites.map(fav => {
-                    return (
-                        <div>
-                            <ul key={fav._id}><b>Question:</b> {fav.question}</ul>
-                            <ul><b>Answer:</b> {fav.answer}</ul>
-                        </div>
-                    )
-                })}
-            </div> */}
+            <form className={styles.msgerInputarea}>
+                <input value={question} onChange={(e) => setQuestion(e.target.value)} type="text" className={styles.msgerInput} placeholder="Enter your question..." />
+                <button onClick={e => handleSubmitQuestion(e)} type="submit" disabled={isLoading} className={styles.msgerSendBtn}>Send</button>
+            </form>
         </Layout>
     );
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+
     const { db } = await connectToDatabase();
-    const session = await auth0.getSession(req, res)
+    const session = await auth0.getSession(req, res);
+    const id = getCookie('id', { req, res });
 
     if (!session?.user) {
-      return { redirect: { destination: '/api/login', permanent: false } }
+        return { redirect: { destination: '/api/login', permanent: false } }
     }
 
     const conversationHistory = await db
         .collection("conversationHistory")
-        .find({})
-        .sort({ metacritic: -1 })
-        .limit(20)
-        .toArray();
+        .find({ _id: ObjectID(id as string) })
+        //.sort({ metacritic: -1 })
+        //.limit(20)
+        .toArray()
 
     return {
         props: {
-            // conversationHistory: JSON.parse(JSON.stringify(conversationHistory)),
-            fallback: {
-                'api/db/getConversationHistory': JSON.parse(JSON.stringify(conversationHistory))
-            }
+            conversationHistory: JSON.parse(JSON.stringify(conversationHistory[0]?.conversation) || null),
+            // fallback: {
+            //     'api/db/getConversationHistory': JSON.parse(JSON.stringify(conversationHistory))
+            // }
         },
     };
-}
-
-export default function Page({ fallback }) {
-    // SWR hooks inside the `SWRConfig` boundary will use those values.
-    return (
-        <SWRConfig value={{ fallback }}>
-            <Research />
-        </SWRConfig>
-    )
 }

@@ -2,8 +2,14 @@ import Layout from '../components/layout'
 import { useFetchUser } from '../lib/user'
 // add bootstrap css 
 import 'bootstrap/dist/css/bootstrap.css'
+import { useEffect } from 'react'
+import styles from './styles.module.scss'
 const Home = () => {
   const { user, loading } = useFetchUser()
+
+  // useEffect(() => {
+  //   document.querySelector("#__next").className = "color: 'red'";
+  // }, []);
 
   return (
     <Layout user={user} loading={loading}>

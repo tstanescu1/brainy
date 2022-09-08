@@ -33,7 +33,7 @@ import { setCookie } from 'cookies-next';
 
 const fetchConversation = async (id) => {
     if (id && id.length === 24) {
-        const res = await fetch('api/db/getConversationHistory', {
+        const res = await fetch('api/db/getConversation', {
             method: "POST",
             body: JSON.stringify({
                 collection: 'conversationHistory',
@@ -57,23 +57,22 @@ export default function Research({ conversationHistory }) {
     const getID = getCookie('id');
     const setID = (queryID: string) => setCookie('id', queryID)
 
-    console.log('getID', getID)
     const [question, setQuestion] = useState('')
     const [tempQuestion, setTempQuestion] = useState(null)
     const [isBusy, setIsBusy] = useState(false);
-    const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getID))
+    const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getID || queryID))
     const [conversation, setConversation] = useState() //had to remove
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
         if (query.new) {
             setConversation(null);
-        } else if (queryID === getID) { //If ID's match
-            refetch().then(data => setConversation(data?.data.data))
+        } else if (queryID === getID) {
+            data?.data && refetch().then(data => setConversation(data?.data.data)) //
         }
         else if (queryID?.length === 24 && queryID !== getID) { //If a New ID exists in the browser, set it
             console.log('queryID',queryID)
-            setID(queryID)
+            setID(queryID as string)
         } else if (getID && !queryID) {  //If there is an ID in cookie, but no ID in the browser, default to the cookie
             router.push({ pathname: '/research', query: { id: getID } })
         } else {
@@ -115,7 +114,7 @@ export default function Research({ conversationHistory }) {
                 body: JSON.stringify({
                     payload: {
                         userEmail: user.email,
-                        subject: "Prompt Helper Subject",
+                        subject: "Prompt Helper Subject", // see what should be the subject
                         dateCreated: new Date(),
                         conversation: [
                             {
@@ -136,7 +135,7 @@ export default function Research({ conversationHistory }) {
 
         await response.json().then((data) => {
             const newID = JSON.parse(JSON.stringify(data.id))
-            console.log('newID CREATE NEW', newID, data)
+            //console.log('newID CREATE NEW', newID, data)
             setCookie('id', newID);
             router.push({ pathname: '/research', query: { id: newID } })
                 .then(() => {
@@ -206,7 +205,7 @@ export default function Research({ conversationHistory }) {
                 setConversation(JSON.parse(JSON.stringify(data.data.data)));
                 // setIsBusy(false)
             }).catch(err => console.log(err))
-            // fetcher('api/db/getConversationHistory')
+            // fetcher('api/db/getConversation')
             // .then((data) => {
             //     setConversation(JSON.parse(JSON.stringify(data.data)));
             //     // setIsBusy(false)
@@ -234,10 +233,10 @@ export default function Research({ conversationHistory }) {
                 }).catch(err => console.log(err))
         )
     }
-    console.log('convo', conversation)
-    return (
-        //Redirect to login link if no user
-        <Layout user={user} loading={loading}>
+
+        return (
+            //Redirect to login link if no user
+            <Layout user={user} loading={loading}>
 
             <div id="chatBox" className={styles.msgerChat}>
                 <div className={styles.msgBubble}>
@@ -358,7 +357,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
         props: {
             conversationHistory: JSON.parse(JSON.stringify(conversationHistory[0]?.conversation) || null),
             // fallback: {
-            //     'api/db/getConversationHistory': JSON.parse(JSON.stringify(conversationHistory))
+            //     'api/db/getConversation': JSON.parse(JSON.stringify(conversationHistory))
             // }
         },
     };

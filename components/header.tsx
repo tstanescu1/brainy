@@ -1,6 +1,7 @@
 import { getCookie } from 'cookies-next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import React from 'react'
 import useLocalStorage from '../lib/useLocalStorage'
 
 type HeaderProps = {
@@ -44,6 +45,11 @@ const Header = ({ user, loading }: HeaderProps) => {
                 <li>
                   <Link href={{ pathname: '/research', query: { id: queryID || getCookie('id') } }}>
                     <button type="submit" className="navBtn">Resume</button>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={{ pathname: '/conversations' }}>
+                    <button type="submit" className="navBtn">Conversations</button>
                   </Link>
                 </li>
               </>

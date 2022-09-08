@@ -11,8 +11,8 @@ export default async function handler(req, res) {
   _id: ObjectID(id)
 }, {
   //$set to replace
-  $push: {
-      conversation: payload
+  $set: {
+      subject: payload.subject
   }
 }).then(() => {
   res.status(200).json({ result: "success" })

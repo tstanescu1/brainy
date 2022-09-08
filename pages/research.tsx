@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { connectToDatabase } from "../services/mongoDB";
 import { openAIResponse } from "../services/openaiService";
-import Image from 'next/image'
-import axios from "axios";
 import router, { useRouter } from 'next/router'
 
 import { useFetchUser } from '../lib/user'
@@ -20,6 +18,8 @@ import { setCookie } from 'cookies-next';
 //make chat full div - https://jsfiddle.net/m0rmLLca/7/
 //make sure to test cases internet connection is down or response id down
 
+//Edit conversation within text.
+//Move all handlers in services?
 //add reply button, or reply single / reply all previous
 //reply single - use last conversation in array by time?
 //reply all - use all previous conversation in the prompt - or additional promptSet which then gets cleared on response?
@@ -61,7 +61,7 @@ export default function Research({ conversationHistory }) {
     const [tempQuestion, setTempQuestion] = useState(null)
     const [isBusy, setIsBusy] = useState(false);
     const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getID || queryID))
-    const [conversation, setConversation] = useState() //had to remove
+    const [conversation, setConversation] = useState([])
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -71,7 +71,7 @@ export default function Research({ conversationHistory }) {
             data?.data && refetch().then(data => setConversation(data?.data.data)) //
         }
         else if (queryID?.length === 24 && queryID !== getID) { //If a New ID exists in the browser, set it
-            console.log('queryID',queryID)
+            //console.log('queryID',queryID)
             setID(queryID as string)
         } else if (getID && !queryID) {  //If there is an ID in cookie, but no ID in the browser, default to the cookie
             router.push({ pathname: '/research', query: { id: getID } })
@@ -94,27 +94,24 @@ export default function Research({ conversationHistory }) {
     };
     useEffect(scrollToBottom, [conversation, isBusy, tempQuestion]);
 
-
     const handleSubmitQuestion = async (e) => {
         e.preventDefault();
         setIsBusy(true);
         setTempQuestion(question);
         setQuestion("");
         const res = await openAIResponse(question, conversation);
-        conversation ? handleUpdate(res) : handleCreate(res);
+        conversation ? handleUpdateConversation(res) : handleCreateConversation(res);
     };
 
-
-
-    async function handleCreate(res) {
+    async function handleCreateConversation(res) {
         setIsBusy(true)
         const response = await
-            fetch("/api/db/insertOneMongo", {
+            fetch("/api/db/createConversation", {
                 method: "POST",
                 body: JSON.stringify({
                     payload: {
                         userEmail: user.email,
-                        subject: "Prompt Helper Subject", // see what should be the subject
+                        subject: "_", // see what should be the subject
                         dateCreated: new Date(),
                         conversation: [
                             {
@@ -151,10 +148,10 @@ export default function Research({ conversationHistory }) {
         )
     }
 
-    async function handleUpdate(res) {
+    async function handleUpdateConversation(res) {
         // setIsBusy(true)
 
-        await fetch("/api/db/updateOneMongo", {
+        await fetch("/api/db/updateConversation", {
             method: "PATCH",
             body: JSON.stringify({
                 payload: {
@@ -173,7 +170,7 @@ export default function Research({ conversationHistory }) {
         }).then(() => {
             refetch()
                 .then((data) => {
-                    console.log('updated data', JSON.parse(JSON.stringify(data.data.data)))
+                    //console.log('updated data', JSON.parse(JSON.stringify(data.data.data)))
                     setConversation(JSON.parse(JSON.stringify(data.data.data)));
                     setTempQuestion(null)
                     setIsBusy(false)
@@ -183,7 +180,7 @@ export default function Research({ conversationHistory }) {
     }
 
     const handleDeleteQuestion = async (timestamp) => {
-        await fetch("/api/db/deleteOneMongo", {
+        await fetch("/api/db/deleteQuestion", {
             method: "DELETE",
             body: JSON.stringify({
                 payload: {
@@ -200,7 +197,7 @@ export default function Research({ conversationHistory }) {
             },
         }).then(() => refetch()
             .then((data) => {
-                console.log('del', JSON.parse(JSON.stringify(data.data)))
+                //console.log('del', JSON.parse(JSON.stringify(data.data)))
 
                 setConversation(JSON.parse(JSON.stringify(data.data.data)));
                 // setIsBusy(false)
@@ -210,27 +207,6 @@ export default function Research({ conversationHistory }) {
             //     setConversation(JSON.parse(JSON.stringify(data.data)));
             //     // setIsBusy(false)
             // }).catch(err => console.log(err))
-        )
-    }
-
-    const handleFetchConversation = async (id) => {
-        await fetch("api/db/getConversationHistory", {
-            method: "GET",
-            body: JSON.stringify({
-                collection: 'conversationHistory',
-                id: id,
-            }),
-            headers:
-            {
-                "Content-Type":
-                    "application/json",
-            },
-        }).then(() =>
-            refetch()
-                .then((data) => {
-                    setConversation(JSON.parse(JSON.stringify(data.data.data)));
-                    // setIsBusy(false)
-                }).catch(err => console.log(err))
         )
     }
 
@@ -250,7 +226,7 @@ export default function Research({ conversationHistory }) {
                     </div>
                 </div>
 
-                {conversation && conversation?.map((conversation, index) => {
+                {conversation && conversation.map((conversation, index) => {
                     const questionDate = new Date(conversation.timestamp).toLocaleString()
                     return (<div key={index}>
 

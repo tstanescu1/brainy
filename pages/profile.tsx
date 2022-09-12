@@ -7,7 +7,7 @@ import { User } from "../interfaces"
 import { useFetchUser } from "../lib/user"
 import { connectToDatabase } from "../services/mongoDB";
 
-
+//Manage subscription or input API key?
 
 type ProfileCardProps = {
   user: User;
@@ -17,13 +17,11 @@ type ProfileCardProps = {
 const ProfileCard = ({ user, isConnected }: ProfileCardProps) => {
 
   return (
-    <>
-      <h1>Profiles</h1>
+    <div style={{ paddingTop: "57px", paddingLeft: "2rem" }}>
+
+      <h1>Profile</h1>
 
       <div>
-        <h3>Profiles</h3>
-        <img src={user.picture} alt="user picture" />
-        <p>nickname: {user.nickname}</p>
         <p>name: {user.name}</p>
         <p>email: {user.email}</p>
         <p>Connected to DB: {isConnected ? 'Yes' : 'No'}</p>
@@ -32,7 +30,7 @@ const ProfileCard = ({ user, isConnected }: ProfileCardProps) => {
       {user &&
         <a href="/api/logout">Logout</a>
       }
-    </>
+    </div>
   )
 }
 

@@ -4,6 +4,8 @@ import { useFetchUser } from '../lib/user'
 import 'bootstrap/dist/css/bootstrap.css'
 import { useEffect } from 'react'
 import styles from './styles.module.scss'
+import React from 'react'
+import Link from 'next/link'
 const Home = () => {
   const { user, loading } = useFetchUser()
 
@@ -13,31 +15,27 @@ const Home = () => {
 
   return (
     <Layout user={user} loading={loading}>
-      <h1>INDEX PAGE</h1>
+      <div style={{ paddingTop: "57px", paddingLeft: "2rem" }}>
 
-      {loading && <p>Loading login info...</p>}
+        {!loading && !user && (
+          <>
+            <h1>Brainy The Research AI</h1>
+            <p>
+              Once you have logged in you should be able to start a conversation with <i>Brainy</i>
+            </p>
+          </>
+        )}
 
-      {!loading && !user && (
-        <>
-          <p>
-            To test the login click in <i>Login</i>
-          </p>
-          <p>
-            Once you have logged in you should be able to click in{' '}
-            <i>Profile</i> and <i>Logout</i>
-          </p>
-        </>
-      )}
+        {user && (
+          <>
+            <h4>Hi {user.name},</h4>
+            <p>Click the top right wrench icon to start a new conversation.</p>
+          </>
+        )
+        }
 
-      {user && (
-        <>
-          <h4>Rendered user info on the clientsss</h4>
-          <img src={user.picture} alt="user picture" />
-          <p>nickname: {user.nickname}</p>
-          <p>name: {user.name}</p>
-        </>
-      )}
-    </Layout>
+      </div >
+    </Layout >
   )
 }
 

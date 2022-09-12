@@ -1,7 +1,7 @@
 import { getCookie } from 'cookies-next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useState } from 'react'
 import useLocalStorage from '../lib/useLocalStorage'
 
 type HeaderProps = {
@@ -12,83 +12,119 @@ type HeaderProps = {
 const Header = ({ user, loading }: HeaderProps) => {
   const { query } = useRouter();
   const queryID = query.id
+  const [openMenu, setOpenMenu] = useState(false)
 
-
+  // 🤖
   return (
+
     <header>
 
-      <nav>
-        <ul>
-          <li>
+      <div className="msgerHeaderTitle">
+        <div onClick={() => setOpenMenu(!openMenu)}>Brainy❤️AI</div>
+
+        {openMenu && user &&
+          <>
             <Link href="/">
               <a>Home</a>
             </Link>
-          </li>
-          <li>
-            <Link href="/about">
-              <a>About</a>
-            </Link>
-          </li>
-          {user && <li>
             <Link href="/profile">
               <a>Profile</a>
             </Link>
-          </li>}
-          {!loading &&
-            (user ? (
-              <>
-                <li>
-                  <Link href={{ pathname: '/research', query: { id: queryID || null, new: true } }}>
-                    <button onClick={() => {}} type="submit" className="navBtn">New</button>
-                  </Link>
-                </li>
-                <li>
-                  <Link href={{ pathname: '/research', query: { id: queryID || getCookie('id') } }}>
-                    <button type="submit" className="navBtn">Resume</button>
-                  </Link>
-                </li>
-                <li>
-                  <Link href={{ pathname: '/conversations' }}>
-                    <button type="submit" className="navBtn">Conversations</button>
-                  </Link>
-                </li>
-              </>
-            ) : ( //`/research/?id=${encodeURIComponent(id)}`
+            <Link href="/api/logout">
+              <a>Logout</a>
+            </Link>
+          </>
+        }
+      </div>
+      {/* If conversation, show convo title, when clicking, edit? */}
+      {/* <div>COnvo Title</div> */}
+
+      <div className="msgerHeaderOptions">
+        <nav>
+          <ul>
+            {!user ?
               <li>
-                <a href="/api/login">Login</a>
-              </li>
-            ))}
-        </ul>
-      </nav>
+                <Link href="/api/login">
+                  <a>Register/Login</a>
+                </Link>
+              </li> :
+              <li>
+                <button onClick={() => setOpenMenu(!openMenu)} type="submit">⚙️</button>
+              </li>}
+            {openMenu && !loading &&
+              (user ? (
+                <>
+                  <li>
+                    <Link href={{ pathname: '/research', query: { id: queryID || null, new: true } }}>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>New</button>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href={{ pathname: '/research', query: { id: queryID || getCookie('id') } }}>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>Resume</button>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href={{ pathname: '/conversations' }}>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>Conversations</button>
+                    </Link>
+                  </li>
+                </>
+              ) : ( //`/research/?id=${encodeURIComponent(id)}`
+                ''
+              ))}
+          </ul>
+        </nav>
+        <span><i className="wrench"></i></span>
+      </div>
+
+
+
 
       <style jsx>{`
         header {
-          position: sticky;
-          top: 0;
-          padding: 0.2rem;
-          color: #fff;
-          background-color: #333;
-          box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
-          height: 7vh;
-        }
-        nav {
-          margin: 1rem auto;
-          padding-left: 1rem;
-        }
-        ul {
+          // position: sticky;
+          // top: 0;
+          // padding: 0.2rem;
+          // color: #fff;
+          // background-color: #333;
+          // box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+          // height: 7vh;
           display: flex;
+          justify-content: space-between;
+          //padding: 10px;
+          border-bottom: 2px solid #ddd;
+          background: #f8f9fa;
+          margin-bottom: 5px;
+          position: absolute;
+          z-index: 1;
+          width: 100%;
+          padding-bottom: 6px;
+          box-shadow: 0 2px 3px -2px grey;
+          
+        }
+         nav {
+           //margin: 1rem auto;
+           padding-left: 1rem;
+         }
+        ul {
+          //display: flex;
           list-style: none;
           margin-left: 0;
           padding-left: 0;
+          text-align: right;
+          //flex-flow: wrap;
+          margin-bottom: 0px;
+          margin-top: 4px;
         }
         li {
-          margin-right: 1rem;
+          margin-right: 0.5rem;
         }
-        li:nth-child(3) {
-          margin-right: auto;
-        }
+        // li:nth-child(1) {
+        //   margin-right: auto;
+        // }
         a {
-          color: #fff;
+          color: #000;
           text-decoration: none;
         }
         button {
@@ -115,6 +151,26 @@ const Header = ({ user, loading }: HeaderProps) => {
         .navBtn:hover {
           background: rgb(0, 180, 50);
         }
+        .msgerHeaderTitle {
+            display: grid;
+            justify-content: space-between;
+            padding: 6px 10px 0 10px;
+            border-bottom: var(--border);
+            color: #7a7a7a;
+            cursor: pointer;
+        };
+        .menuWrapper {
+          display: grid;
+        }
+        }
+      .msgerHeaderOptions {
+        display: flex;
+        justify-content: space-between;
+        //padding: 10px;
+        border-bottom: var(--border);
+        background: #eee;
+        color: #666;
+      };
         
       `}</style>
     </header>

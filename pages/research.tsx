@@ -15,22 +15,21 @@ import { getCookie } from 'cookies-next';
 import { setCookie } from 'cookies-next';
 
 
-//make chat full div - https://jsfiddle.net/m0rmLLca/7/
+//Style entire app - with chat layout?
+//Move all handlers in services?
+
+//Change convo subject in session
+//Add to favorites star in both research and convo
+//session cookie extend time logged in and error handling with alerts? can we use vercel's alerts?
+//Format text from openAI so it looks properly indented
 //make sure to test cases internet connection is down or response id down
 
-//Edit conversation within text.
-//Move all handlers in services?
-//add reply button, or reply single / reply all previous
-//reply single - use last conversation in array by time?
-//reply all - use all previous conversation in the prompt - or additional promptSet which then gets cleared on response?
-//delete specific conversation to optimize chat
 
-//session cookie extend time logged in and error handling with alerts? can we use vercel's alerts?
-//on delete css effect to fade away
-//Format text from openAI so it looks properly indented
-
-//Maybe only display last 50 convos max? Or increase size of response systematically
-
+/* Wish list
+-Maybe only display last 50 convos max? Or increase size of response systematically
+-on delete css effect to fade away
+-share conversations?
+*/
 const fetchConversation = async (id) => {
     if (id && id.length === 24) {
         const res = await fetch('api/db/getConversation', {
@@ -210,9 +209,9 @@ export default function Research({ conversationHistory }) {
         )
     }
 
-        return (
-            //Redirect to login link if no user
-            <Layout user={user} loading={loading}>
+    return (
+        //Redirect to login link if no user
+        <Layout user={user} loading={loading}>
 
             <div id="chatBox" className={styles.msgerChat}>
                 <div className={styles.msgBubble}>
@@ -306,7 +305,7 @@ export default function Research({ conversationHistory }) {
 
             <form className={styles.msgerInputarea}>
                 <input value={question} onChange={(e) => setQuestion(e.target.value)} type="text" className={styles.msgerInput} placeholder="Enter your question..." />
-                <button onClick={e => handleSubmitQuestion(e)} type="submit" disabled={isLoading} className={styles.msgerSendBtn}>Send</button>
+                <button onClick={e => handleSubmitQuestion(e)} type="submit" disabled={isBusy} className={styles.msgerSendBtn}>Send</button>
             </form>
         </Layout>
     );

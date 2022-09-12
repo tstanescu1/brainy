@@ -110,9 +110,8 @@ export default function Conversations() {
 
         <Layout user={user} loading={loading}>
             {/* {user && !conversations && <div>Loading...</div>} */}
-            {user ?
+            <div className={styles.convoListWrapper}>{user ?
                 <>
-                    <h1 className={styles.title}>Conversation History</h1>
                     <table className={styles.conversations}>
                         <thead>
                             <tr>{renderHeader()}</tr>
@@ -123,7 +122,7 @@ export default function Conversations() {
                     </table>
                 </> : <div>You must log in to see your conversations.</div>
 
-            }
+            }</div>
         </Layout>
     )
 }

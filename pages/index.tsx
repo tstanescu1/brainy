@@ -15,7 +15,8 @@ const Home = () => {
 
   return (
     <Layout user={user} loading={loading}>
-      <div style={{ paddingTop: "57px", paddingLeft: "2rem" }}>
+      <div style={{ paddingTop: "57px", paddingLeft: "2rem", paddingRight: "2rem",
+    textAlign: "justify" }}>
 
         {!loading && !user && (
           <>
@@ -33,6 +34,25 @@ const Home = () => {
           </>
         )
         }
+        <p>
+          Brainy is a simple yet powerful conversational AI (artificial intelligence) chatbot powered by open AI’s most powerful davinci-02 model.
+          <br />          The purpose of Brainy is to have a continuous context based conversation. With each reply, Brainy receives the previous conversations which helps develop a useful conversation.
+          <br /><br />
+          How to use
+          <br />
+          Creating a new conversation
+          Examples of how to have a useful conversation.
+          What to do if Brainy stops responding useful replies. Delete conversation .
+          <br />          Ideas on how to train the AI to get better responses
+          <br />          Brainy was created with the idea of conversational research in mind, a virtual brain who has access to much of the information available on the internet. This information can then be searched using the chat interface. Each reply is then submitted along with the previous chat history, which gives the AI context and meaning.
+          <br />
+          FAQ
+
+          If a conversation gets out of hand what should I do?
+          you can either delete the chat which is causing trouble, or start a new conversation.
+
+          Improve on QA, make it as easy as possible to answer questions
+        </p>
 
       </div >
     </Layout >

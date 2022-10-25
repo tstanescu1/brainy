@@ -8,19 +8,18 @@ type HeaderProps = {
   user?: any
   loading: boolean
 }
-// console.log('id',localStorage.getItem('id'))
 const Header = ({ user, loading }: HeaderProps) => {
   const { query } = useRouter();
   const queryID = query.id
   const [openMenu, setOpenMenu] = useState(false)
 
-  // 🤖
+  // 🤖❤️
   return (
 
     <header>
 
       <div className="msgerHeaderTitle">
-        <div onClick={() => setOpenMenu(!openMenu)}>Brainy❤️AI</div>
+        <div onClick={() => setOpenMenu(!openMenu)}>Brainy🤖AI</div>
 
         {openMenu && user &&
           <>
@@ -36,8 +35,6 @@ const Header = ({ user, loading }: HeaderProps) => {
           </>
         }
       </div>
-      {/* If conversation, show convo title, when clicking, edit? */}
-      {/* <div>COnvo Title</div> */}
 
       <div className="msgerHeaderOptions">
         <nav>
@@ -83,13 +80,6 @@ const Header = ({ user, loading }: HeaderProps) => {
 
       <style jsx>{`
         header {
-          // position: sticky;
-          // top: 0;
-          // padding: 0.2rem;
-          // color: #fff;
-          // background-color: #333;
-          // box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
-          // height: 7vh;
           display: flex;
           justify-content: space-between;
           //padding: 10px;
@@ -104,11 +94,9 @@ const Header = ({ user, loading }: HeaderProps) => {
           
         }
          nav {
-           //margin: 1rem auto;
            padding-left: 1rem;
          }
         ul {
-          //display: flex;
           list-style: none;
           margin-left: 0;
           padding-left: 0;
@@ -166,7 +154,6 @@ const Header = ({ user, loading }: HeaderProps) => {
       .msgerHeaderOptions {
         display: flex;
         justify-content: space-between;
-        //padding: 10px;
         border-bottom: var(--border);
         background: #eee;
         color: #666;

@@ -6,7 +6,7 @@ import router, { useRouter } from 'next/router'
 import { useFetchUser } from '../lib/user'
 
 import Layout from '../components/layout'
-import styles from './research.module.scss'
+import styles from './chat.module.scss'
 import auth0 from "../lib/auth0";
 import { GetServerSideProps } from "next/types";
 import { useQuery } from "react-query";
@@ -17,8 +17,11 @@ import { setCookie } from 'cookies-next';
 
 //Style entire app - with chat layout?
 //Move all handlers in services?
+//Clean up promises with try catch
 
 //Change convo subject in session
+//Change backHistory memory in session
+
 //Add to favorites star in both research and convo
 //session cookie extend time logged in and error handling with alerts? can we use vercel's alerts?
 //Format text from openAI so it looks properly indented
@@ -26,7 +29,7 @@ import { setCookie } from 'cookies-next';
 
 
 /* Wish list
--Maybe only display last 50 convos max? Or increase size of response systematically
+-Maybe only display last 50 convos max?
 -on delete css effect to fade away
 -share conversations?
 */
@@ -59,7 +62,7 @@ export default function Research({ conversationHistory }) {
     const [question, setQuestion] = useState('')
     const [tempQuestion, setTempQuestion] = useState(null)
     const [isBusy, setIsBusy] = useState(false);
-    const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getID || queryID))
+    const { isLoading, isError, isSuccess, data, status, refetch } = useQuery(['conversations'], () => fetchConversation(getCookie('id') || queryID))
     const [conversation, setConversation] = useState([])
     const messagesEndRef = useRef(null);
 
@@ -73,16 +76,11 @@ export default function Research({ conversationHistory }) {
             //console.log('queryID',queryID)
             setID(queryID as string)
         } else if (getID && !queryID) {  //If there is an ID in cookie, but no ID in the browser, default to the cookie
-            router.push({ pathname: '/research', query: { id: getID } })
+            router.push({ pathname: '/chat', query: { id: getID } })
         } else {
             setConversation(null)
         }
     }, [data, query, queryID, getID])
-
-    //If new, clear convo, and on Submit it will create a new ID
-    //If ID exists from URL - should LOAD ID in URL
-    //If NO ID in URL - load existing ID from storage
-    //If id exists in localstorage but no ID has been provided, add ID to query params
 
     const scrollToBottom = () => {
         data && messagesEndRef.current && messagesEndRef.current.scrollIntoView({
@@ -98,7 +96,7 @@ export default function Research({ conversationHistory }) {
         setIsBusy(true);
         setTempQuestion(question);
         setQuestion("");
-        const res = await openAIResponse(question, conversation);
+        const res = await openAIResponse(question, conversation); //can add backHistory
         conversation ? handleUpdateConversation(res) : handleCreateConversation(res);
     };
 
@@ -131,16 +129,17 @@ export default function Research({ conversationHistory }) {
 
         await response.json().then((data) => {
             const newID = JSON.parse(JSON.stringify(data.id))
-            //console.log('newID CREATE NEW', newID, data)
-            setCookie('id', newID);
-            router.push({ pathname: '/research', query: { id: newID } })
-                .then(() => {
+            console.log('newID CREATE NEW', newID, data)
+            // setCookie('id', newID);
+            setID(newID);
+            router.push({ pathname: '/chat', query: { id: newID } })
+                // .then(() => {
                     refetch().then(data => {
                         console.log('data in refetch', data)
                         setConversation(JSON.parse(JSON.stringify(data.data.data)));
                         setTempQuestion(null)
                         setIsBusy(false)
-                    })
+                    // })
                 })
             //after created clear ?new query param, and set new ID in url bar so it fetches the right data!
         }
@@ -221,10 +220,10 @@ export default function Research({ conversationHistory }) {
                     </div>
 
                     <div className={styles.msgText}>
-                        Hi, I am Brainy, the research AI! Ask me a question. More details, the better! 😄
+                        Hi, I am Brainy, the research AI! Ask me a question to start a conversation. When trying to communicate with me, please be as detailed as possible, if you try to trick me you won't get the response you look for! 😄
                     </div>
                 </div>
-
+                <div>{isLoading && 'Loading...'}</div>
                 {conversation && conversation.map((conversation, index) => {
                     const questionDate = new Date(conversation.timestamp).toLocaleString()
                     return (<div key={index}>

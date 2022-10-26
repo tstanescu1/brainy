@@ -93,7 +93,7 @@ export default function Conversations() {
 
             return (
                 <tr key={_id}>
-                    <td style={{cursor:"pointer", fontWeight: "bold", color: "#7293ba"}} onClick={() => router.push({ pathname: '/research', query: { id: _id } })}>{_id}</td>
+                    <td style={{cursor:"pointer", fontWeight: "bold", color: "#7293ba"}} onClick={() => router.push({ pathname: '/chat', query: { id: _id } })}>{_id}</td>
                     <td><InputTextBlur id={_id} subject={subject} onBlur={(value, id) => handleUpdateConversationSubject(value, id)} /></td>
                     <td>{formattedDate}</td>
                     <td>{conversation.length}</td>

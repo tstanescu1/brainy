@@ -1,6 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
 
-export const openAIResponse = async (question, conversations) => {
+export const openAIResponse = async (question, conversations, backHistory = 5) => {
 
   const configuration = new Configuration({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
@@ -8,7 +8,7 @@ export const openAIResponse = async (question, conversations) => {
   const openai = new OpenAIApi(configuration);
 
   //Move prompts in separate file
-  const convoPrompt = conversations ? conversations.map(convo => {
+  const convoPrompt = conversations ? conversations.slice(-backHistory).map(convo => {
     return (
       "\nYou:" + convo.question +
       "\nBrainy:" + convo.answer
@@ -18,13 +18,16 @@ export const openAIResponse = async (question, conversations) => {
   }).join(' ') : "";
 
   const completePrompt =
-    `I am Brainy, your sensei.
-I am a scientist at heart, which means that I always seek the highest possible truth.
-I am creative, but I don't make up facts which aren't rooted in the truth, I like to provide the probability of the answer as well.\n
-${convoPrompt}
-You:${question}
-Brainy:`
+    `
+"brainy: I’m lucky, I am not allergic to anything. \nEND\n 
+me: Do you know of any short haired cats?\nEND\n 
+brainy: Have you ever heard of a cat breed called a Purina?\nEND\n 
+me: Yes I have\nEND\n 
+brainy:”, “completion”: " Perhaps consider adopting a Purina kitten, you’re less likely to be allergic.\nEND\n"
 
+${convoPrompt}
+me:${question}
+brainy:`
 
   console.log('prompt', completePrompt)
 

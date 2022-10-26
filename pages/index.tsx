@@ -30,7 +30,10 @@ const Home = () => {
         {user && (
           <>
             <h4>Hi {user.name},</h4>
-            <p>Click the top right wrench icon to start a new conversation.</p>
+            <p>Brainy is an AI chatbot which can be useful to further knowledge in a specific topic. By using a conversational model, we can easily extract the information required.</p>
+            <p>Click the top right menu icon and select "New" to start a new conversation with Brainy.</p>
+            <p>You can also browse existing conversations by clicking on the "Conversations" button.</p>
+            <p>By default, Brainy looks at the last 5 questions to improve your answer, by gaining a bit of context, the response increases in quality. You can increase the back history by clicking on the back settings menu.</p>
           </>
         )
         }

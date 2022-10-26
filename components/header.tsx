@@ -13,7 +13,7 @@ const Header = ({ user, loading }: HeaderProps) => {
   const queryID = query.id
   const [openMenu, setOpenMenu] = useState(false)
 
-  // 🤖❤️
+  // 🤖❤️⚙️
   return (
 
     <header>
@@ -46,28 +46,29 @@ const Header = ({ user, loading }: HeaderProps) => {
                 </Link>
               </li> :
               <li>
-                <button onClick={() => setOpenMenu(!openMenu)} type="submit">⚙️</button>
+                <button onClick={() => setOpenMenu(!openMenu)} type="submit">☰</button>
               </li>}
+        
             {openMenu && !loading &&
               (user ? (
                 <>
                   <li>
-                    <Link href={{ pathname: '/research', query: { id: queryID || null, new: true } }}>
-                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>New</button>
+                    <Link href={{ pathname: '/chat', query: { new: true } }}>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>New Chat</button>
                     </Link>
                   </li>
                   <li>
-                    <Link href={{ pathname: '/research', query: { id: queryID || getCookie('id') } }}>
-                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>Resume</button>
+                    <Link href={{ pathname: '/chat', query: { id: queryID || getCookie('id') } }}>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>Resume Chat</button>
                     </Link>
                   </li>
                   <li>
                     <Link href={{ pathname: '/conversations' }}>
-                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>Conversations</button>
+                      <button type="submit" className="navBtn" onClick={() => setOpenMenu(false)}>All Chats</button>
                     </Link>
                   </li>
                 </>
-              ) : ( //`/research/?id=${encodeURIComponent(id)}`
+              ) : ( //`/chat/?id=${encodeURIComponent(id)}`
                 ''
               ))}
           </ul>
@@ -117,7 +118,7 @@ const Header = ({ user, loading }: HeaderProps) => {
         }
         button {
           font-size: 1rem;
-          color: #fff;
+          color: #000;
           cursor: pointer;
           border: none;
           background: none;

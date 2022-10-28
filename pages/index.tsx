@@ -6,6 +6,11 @@ import { useEffect } from 'react'
 import styles from './styles.module.scss'
 import React from 'react'
 import Link from 'next/link'
+import router from 'next/router'
+import { GetServerSideProps } from 'next/types'
+import auth0 from "../lib/auth0";
+
+
 const Home = () => {
   const { user, loading } = useFetchUser()
 
@@ -17,7 +22,6 @@ const Home = () => {
     <Layout user={user} loading={loading}>
       <div style={{ paddingTop: "57px", paddingLeft: "2rem", paddingRight: "2rem",
     textAlign: "justify" }}>
-
         {!loading && !user && (
           <>
             <h1>Brainy The Research AI</h1>
@@ -27,16 +31,17 @@ const Home = () => {
           </>
         )}
 
-        {user && (
+        {/* {user && (
           <>
             <h4>Hi {user.name},</h4>
-            <p>Brainy is an AI chatbot which can be useful to further knowledge in a specific topic. By using a conversational model, we can easily extract the information required.</p>
+            <p>Brainy is an AI chatbot which can be useful to further knowledge in a specific topic. 
+              By using a conversational model, we can easily extract the information required by creating a multi turn chat.</p>
             <p>Click the top right menu icon and select "New" to start a new conversation with Brainy.</p>
             <p>You can also browse existing conversations by clicking on the "Conversations" button.</p>
-            <p>By default, Brainy looks at the last 5 questions to improve your answer, by gaining a bit of context, the response increases in quality. You can increase the back history by clicking on the back settings menu.</p>
+            <p>By default, Brainy looks at the last few questions to improve your answer, by gaining a bit of context, the response increases in quality. You can increase the back history by clicking on the back settings menu.</p>
           </>
         )
-        }
+        } */}
         <p>
           Brainy is a simple yet powerful conversational AI (artificial intelligence) chatbot powered by open AI’s most powerful davinci-02 model.
           <br />          The purpose of Brainy is to have a continuous context based conversation. With each reply, Brainy receives the previous conversations which helps develop a useful conversation.
@@ -60,6 +65,19 @@ const Home = () => {
       </div >
     </Layout >
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+
+  const session = await auth0.getSession(req, res);
+
+  if (session?.user) {
+      return { redirect: { destination: '/chat', permanent: false } }
+  }
+  return {
+    props: {},
+};
+
 }
 
 export default Home

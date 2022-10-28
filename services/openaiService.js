@@ -8,6 +8,8 @@ export const openAIResponse = async (question, conversations, backHistory = 5) =
   const openai = new OpenAIApi(configuration);
 
   //Move prompts in separate file
+  //Format response so that line breaks and  are properly placed - like in chrome network dev tools when hovering over response
+  
   const convoPrompt = conversations ? conversations.slice(-backHistory).map(convo => {
     return (
       "\nYou:" + convo.question +

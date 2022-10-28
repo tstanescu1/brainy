@@ -15,23 +15,25 @@ import { getCookie } from 'cookies-next';
 import { setCookie } from 'cookies-next';
 
 
+/*
+PRIORITY:
+//Format text from openAI so it looks properly indented like when hovering response in chrome inspector
+//Improve instructions
+
+SECONDARY:
+//Create a settings side menu that can change "Subject", "Back History", "Delete?"
+//Add to favorites star in both research and convo
+
 //Style entire app - with chat layout?
 //Move all handlers in services?
 //Clean up promises with try catch
+//error handling with alerts? can we use vercel's alerts? - test offline cases and create error popup or integrate into vercel's?
 
-//Change convo subject in session
-//Change backHistory memory in session
-
-//Add to favorites star in both research and convo
-//session cookie extend time logged in and error handling with alerts? can we use vercel's alerts?
-//Format text from openAI so it looks properly indented
-//make sure to test cases internet connection is down or response id down
-
-
-/* Wish list
--Maybe only display last 50 convos max?
+WISH LIST:
 -on delete css effect to fade away
 -share conversations?
+-loading convo waiting screen?
+-Maybe only display last 20 convos and lazy load while scrolling up
 */
 const fetchConversation = async (id) => {
     if (id && id.length === 24) {
@@ -265,10 +267,7 @@ export default function Research({ conversationHistory }) {
                                     <div className={styles.msgInfoName}>Brainy</div>
                                     <div className={styles.msgInfoTime}>{questionDate}</div>
                                 </div>
-
-                                <div className={styles.msgText}>
-                                    {conversation.answer}
-                                </div>
+                                <div dangerouslySetInnerHTML={{__html:conversation.answer.replace(/^\n+|\n+$/g, '').replace(/\r?\n|\r/g, '<br>').normalize()}} className={styles.msgText} />
                             </div>
                         </div>
 

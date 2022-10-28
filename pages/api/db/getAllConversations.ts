@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         .collection(body.collection)
         .find({ userEmail: body.userEmail})
         .sort({ metacritic: -1 })
-        .limit(20)
+        //.limit(20)
         .toArray()
         .then(result => {
             const conversations = JSON.parse(JSON.stringify(result))

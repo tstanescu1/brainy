@@ -20,34 +20,57 @@ const Home = () => {
 
   return (
     <Layout user={user} loading={loading}>
-      <div style={{ paddingTop: "57px", paddingLeft: "2rem", paddingRight: "2rem",
-    textAlign: "justify" }}>
+      <div style={{
+        paddingTop: "57px", paddingLeft: "2rem", paddingRight: "2rem",
+        maxWidth: "750px", border: "solid", background: "#f8f9fa"
+      }}>
         {!loading && !user && (
           <>
-            <h1>Brainy The Research AI</h1>
+            <h1>Brainy Learning Bot</h1>
             <p>
-              Once you have logged in you should be able to start a conversation with <i>Brainy</i>
+              <h6>An Artificial intelligence chatbot that can research any topic of interest.</h6>
+              <br></br>
+              <ul>It can be used to further develop knowledge in an unknown area of science.</ul>
+              <ul>It can help students further understand complex ideas.</ul>
+              <br></br>
+              The main goal of brainy is to become an effective instrument to gain knowledge. <br></br>
+              However, it's best use will be to educate less privileged parts of the world, even in their native tongue.
+              <br></br>
+              <br></br>
+              <h4>How does it work?</h4>
+              Brainy works by taking in a piece of text and then predicting the next word or phrase that should come after it.
+              In order to accomplish this, it uses a deep learning algorithm called <b>GPT-3</b>, which has been trained on a large corpus of text.
+              This allows it to capture the statistical patterns of how words are used together in a sentence.
+              <br></br>
+              <br></br>
+              Brainy's value comes with the continuous context based conversation. With each reply, Brainy receives the previous conversations which helps develop a fruitful conversation.
+              <br></br>
+              <br></br>
+              It can be used for a variety of tasks that involve natural language generation, such as machine translation, question answering, and text summaries.
+              GPT-3 can even be used to generate new texts from scratch, such as stories or articles.
+              GPT-3 chatbot can be very helpful in research and to help students understand complex ideas by generating natural language based on inputted text.
+              <br></br>
+              <br></br>
+
+              Once you have logged in a conversation will be created or resumed with <i>Brainy</i>.
             </p>
+            Questions, comments, critics: <a href="mailto:tstanescu@gmail.com">email me</a>
           </>
         )}
 
         {/* {user && (
           <>
             <h4>Hi {user.name},</h4>
-            <p>Brainy is an AI chatbot which can be useful to further knowledge in a specific topic. 
+            <p>Brainy is an AI chatbot which can be useful to further knowledge in a specific topic.
               By using a conversational model, we can easily extract the information required by creating a multi turn chat.</p>
             <p>Click the top right menu icon and select "New" to start a new conversation with Brainy.</p>
             <p>You can also browse existing conversations by clicking on the "Conversations" button.</p>
             <p>By default, Brainy looks at the last few questions to improve your answer, by gaining a bit of context, the response increases in quality. You can increase the back history by clicking on the back settings menu.</p>
           </>
         )
-        } */}
+        }
         <p>
-          Brainy is a simple yet powerful conversational AI (artificial intelligence) chatbot powered by open AI’s most powerful davinci-02 model.
-          <br />          The purpose of Brainy is to have a continuous context based conversation. With each reply, Brainy receives the previous conversations which helps develop a useful conversation.
-          <br /><br />
-          How to use
-          <br />
+
           Creating a new conversation
           Examples of how to have a useful conversation.
           What to do if Brainy stops responding useful replies. Delete conversation .
@@ -61,6 +84,9 @@ const Home = () => {
 
           Improve on QA, make it as easy as possible to answer questions
         </p>
+ */}
+
+
 
       </div >
     </Layout >
@@ -72,11 +98,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await auth0.getSession(req, res);
 
   if (session?.user) {
-      return { redirect: { destination: '/chat', permanent: false } }
+    return { redirect: { destination: '/chat', permanent: false } }
   }
   return {
     props: {},
-};
+  };
 
 }
 

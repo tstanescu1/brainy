@@ -75,7 +75,6 @@ export default function Research({ conversationHistory }) {
             data?.data && refetch().then(data => setConversation(data?.data.data)) //
         }
         else if (queryID?.length === 24 && queryID !== getID) { //If a New ID exists in the browser, set it
-            //console.log('queryID',queryID)
             setID(queryID as string)
         } else if (getID && !queryID) {  //If there is an ID in cookie, but no ID in the browser, default to the cookie
             router.push({ pathname: '/chat', query: { id: getID } })
@@ -99,7 +98,7 @@ export default function Research({ conversationHistory }) {
         setTempQuestion(question);
         setQuestion("");
         const res = await openAIResponse(question, conversation); //can add backHistory
-        conversation ? handleUpdateConversation(res) : handleCreateConversation(res);
+        conversation?.length ? handleUpdateConversation(res) : handleCreateConversation(res);
     };
 
     async function handleCreateConversation(res) {
@@ -110,7 +109,7 @@ export default function Research({ conversationHistory }) {
                 body: JSON.stringify({
                     payload: {
                         userEmail: user.email,
-                        subject: "_", // see what should be the subject
+                        subject: " ",
                         dateCreated: new Date(),
                         conversation: [
                             {
@@ -135,15 +134,13 @@ export default function Research({ conversationHistory }) {
             // setCookie('id', newID);
             setID(newID);
             router.push({ pathname: '/chat', query: { id: newID } })
-                // .then(() => {
+                .then(() => {
                     refetch().then(data => {
-                        console.log('data in refetch', data)
                         setConversation(JSON.parse(JSON.stringify(data.data.data)));
                         setTempQuestion(null)
                         setIsBusy(false)
-                    // })
+                    })
                 })
-            //after created clear ?new query param, and set new ID in url bar so it fetches the right data!
         }
         )
     }
@@ -210,8 +207,10 @@ export default function Research({ conversationHistory }) {
         )
     }
 
+    //Remove any white space from beginning of text, replace /n with a break, and add spaces where needed.
+    const formatChat = text => text.replace(/^\n+|\n+$/g, '').replace(/\r?\n|\r/g, '<br>').replaceAll('  ', "&nbsp")
+
     return (
-        //Redirect to login link if no user
         <Layout user={user} loading={loading}>
 
             <div id="chatBox" className={styles.msgerChat}>
@@ -221,11 +220,19 @@ export default function Research({ conversationHistory }) {
                         <div className={styles.msgInfoTime}></div>
                     </div>
 
-                    <div className={styles.msgText}>
-                        Hi, I am Brainy, the research AI! Ask me a question to start a conversation. When trying to communicate with me, please be as detailed as possible, if you try to trick me you won't get the response you look for! 😄
-                    </div>
+                    {isLoading ?
+                        <div className={styles.msg + ' ' + styles.leftMsg + ' ' + styles.typingWrapper}>
+                            <div className={styles.typingIndicator}>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div> :
+                        <div className={styles.msgText}>
+                            Hi, I am Brainy, the research AI! Ask me a question to start a conversation. When trying to communicate with me, please be as detailed as possible, if you try to trick me you won't get the response you look for! 😄
+                        </div>
+                    }
                 </div>
-                <div>{isLoading && 'Loading...'}</div>
                 {conversation && conversation.map((conversation, index) => {
                     const questionDate = new Date(conversation.timestamp).toLocaleString()
                     return (<div key={index}>
@@ -233,7 +240,7 @@ export default function Research({ conversationHistory }) {
                         <div className={styles.msg + ' ' + styles.rightMsg}>
                             {/* <div
                             className={styles.msgImg}
-                            style={{ backgroundImage: "url(" + 'https://image.flaticon.com/icons/svg/145/145867.svg' + ")" }}
+                            style={{ backgroundImage: "url(" + 'avatar.svg' + ")" }}
                         ></div> */}
 
                             <div className={styles.msgBubble} id="bubble">
@@ -241,14 +248,14 @@ export default function Research({ conversationHistory }) {
 
 
                                 <div className={styles.msgInfo}>
-                                    <div><div className={styles.msgInfoName}>{user?.name}</div>
-
+                                    <div>
+                                        <div className={styles.msgInfoName}>{user?.name}</div>
                                     </div>
                                     <div className={styles.msgInfoTime}></div>
                                 </div>
 
                                 <div className={styles.msgText}>
-                                    {conversation.question}
+                                    {formatChat(conversation.question)}
                                 </div>
                             </div>
                         </div>
@@ -267,7 +274,7 @@ export default function Research({ conversationHistory }) {
                                     <div className={styles.msgInfoName}>Brainy</div>
                                     <div className={styles.msgInfoTime}>{questionDate}</div>
                                 </div>
-                                <div dangerouslySetInnerHTML={{__html:conversation.answer.replace(/^\n+|\n+$/g, '').replace(/\r?\n|\r/g, '<br>').normalize()}} className={styles.msgText} />
+                                <div dangerouslySetInnerHTML={{ __html: formatChat(conversation.answer) }} className={styles.msgText} />
                             </div>
                         </div>
 

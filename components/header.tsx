@@ -12,6 +12,7 @@ const Header = ({ user, loading }: HeaderProps) => {
   const { query } = useRouter();
   const queryID = query.id
   const [openMenu, setOpenMenu] = useState(false)
+  
 
   // 🤖❤️⚙️
   return (

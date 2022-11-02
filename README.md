@@ -1,31 +1,27 @@
-# Next.js and Auth0 Example
+# Brainy Learning Bot
 
-This example shows how you can use `@auth0/nextjs-auth` to easily add authentication support to your Next.js application. It tries to cover a few topics:
+An Artificial intelligence chatbot that can research any topic of interest.
 
-- Signing in
-- Signing out
-- Loading the user on the server side and adding it as part of SSR ([`pages/advanced/ssr-profile.tsx`](pages/advanced/ssr-profile.tsx))
-- Loading the user on the client side and using fast/cached SSR pages ([`pages/index.tsx`](pages/index.tsx))
-- API Routes which can load the current user ([`pages/api/me.ts`](pages/api/me.ts))
-- Using hooks to make the user available throughout the application ([`lib/user.ts`](lib/user.ts))
+It can be used to further develop knowledge in an unknown area of science.
+It can help students further understand complex ideas.
 
-Read more: [https://auth0.com/blog/ultimate-guide-nextjs-authentication-auth0/](https://auth0.com/blog/ultimate-guide-nextjs-authentication-auth0/)
+The main goal of brainy is to become an effective instrument to gain knowledge.
+However, it's best use will be to educate less privileged parts of the world, even in their native tongue.
+
+How does it work?
+Brainy works by taking in a piece of text and then predicting the next word or phrase that should come after it. In order to accomplish this, it uses a deep learning algorithm called GPT-3, which has been trained on a large corpus of text. This allows it to capture the statistical patterns of how words are used together in a sentence.
+
+Brainy's value comes with the continuous context based conversation. With each reply, Brainy receives the previous conversations which helps develop a fruitful conversation.
+
+It can be used for a variety of tasks that involve natural language generation, such as machine translation, question answering, and text summaries. GPT-3 can even be used to generate new texts from scratch, such as stories or articles. GPT-3 chatbot can be very helpful in research and to help students understand complex ideas by generating natural language based on inputted text.
+
+Once you have logged in a conversation will be created or resumed with Brainy.
+
+Questions, comments, critics: email me
 
 ## How to use
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
-
-```bash
-npx create-next-app --example auth0 auth0-app
-```
-
-```bash
-yarn create next-app --example auth0 auth0-app
-```
-
-```bash
-pnpm create next-app --example auth0 auth0-app
-```
+Do a pull, and then npm install.
 
 ## Configuring Auth0
 

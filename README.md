@@ -1,5 +1,7 @@
 # Brainy Learning Bot
 
+Open Source Chatbot built with Next JS, OpenAI's GPT-3.
+
 An Artificial intelligence chatbot that can research any topic of interest.
 
 It can be used to further develop knowledge in an unknown area of science.
